@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Garage Door</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <script src="ui.js"></script>
+  </head>
+  <body onload="requestStatus();">
+    <div style="text-align: center; margin-top: 100px;">
+      <button id="button" style="font-size: 32pt;" onclick="pressButton();">Garage Door</button>
+    </div>
+
+    <div style="text-align: center; font-size: 8pt; margin-top: 4px;">
+      Presses: <span id="presses" style="padding-right: 2em;">0</span>
+      Up: <span id="upHours" style="padding-right: 2em;">0</span>
+      Free: <span id="freeRam">0</span>
+    </div>
+  </body>
+</html>

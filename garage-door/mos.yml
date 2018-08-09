@@ -1,0 +1,51 @@
+author: Paul Blankenbaker
+description: Experiment with Mongoose OS to create a Web based garage door opener
+version: 1.0
+
+libs_version: ${mos.version}
+modules_version: ${mos.version}
+mongoose_os_version: ${mos.version}
+
+# Optional. List of tags for online search.
+tags:
+  - js
+  - garage door
+  - websocket
+  - http
+
+# List of files / directories with C sources.
+#sources:
+#  - src
+
+# List of dirs to copy files to top level of device file system
+# (not a recursive copy - no sub-directories in build)
+filesystem:
+  - fs
+
+# Configurable settings used by this application. It is recommended
+# that you create a fs/conf1.json file prior to building your firmware
+# to set reasonable defaults for your hardware (see conf1.template.json
+# for a starting point)
+config_schema:
+  - ["app", "o", {title: "Garage Door Opener"}]
+  - ["app.relayPin", "i", 13, {title: "GPIO pin attached to relay"}]
+  - ["app.relayUpState", "b", false, {title: "State for pin to keep the relay open (unpressed)"}]
+  - ["app.relayDownMsecs", "i", 200, {title: "How many milliseconds to close the relay for to simulate a garage door press"}]
+
+# Libraries used for this app enable the following:
+# - WIFI to enable networking
+# - An HTTP web server so user can trigger relay using a web browser
+# - RPC services to simplify web interface and enable local management
+# - mjs To enable JavaScript on the embedded device.
+libs:
+  - origin: https://github.com/mongoose-os-libs/ca-bundle
+  - origin: https://github.com/mongoose-os-libs/ota-http-server
+  - origin: https://github.com/mongoose-os-libs/http-server
+  - origin: https://github.com/mongoose-os-libs/rpc-service-config
+  - origin: https://github.com/mongoose-os-libs/rpc-service-fs
+  - origin: https://github.com/mongoose-os-libs/rpc-uart
+  - origin: https://github.com/mongoose-os-libs/wifi
+  - origin: https://github.com/mongoose-os-libs/mjs
+
+# Used by the mos tool to catch mos binaries incompatible with this file format
+manifest_version: 2017-09-29
