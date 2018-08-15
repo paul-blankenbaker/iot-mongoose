@@ -60,6 +60,7 @@ getJson() {
     freeRamMin=${freeRam};
   elif ((freeRam == 0)); then
     echo "[ERROR] bad JSON: ${json}";
+    return 1;
   fi
   upTime="$(echo "${json}" | jq '.upTime | floor')";
   return 0;
@@ -83,7 +84,7 @@ for ((i=0; i < 100000; i++)); do
     printf "%s  Main:%5d fail:%5d  Status:%5d fail:%5d  Open:%5d fail:%5d  free:%6d  up:%6d\n" \
            "$(date -Iseconds)" \
            $((mainOk)) $((i + 1 - mainOk)) \
-           $((statusOk)) $((i + 1 - mainOk)) \
+           $((statusOk)) $((i + 1 - statusOk)) \
            $((openOk)) $((openReq - openOk)) \
            $((freeRamMin)) "${upTime}";
   fi
