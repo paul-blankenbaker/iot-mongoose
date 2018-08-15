@@ -57,6 +57,24 @@ mos console
 NOTE: As far as I can tell this requires a direct USB connection to an
 ESP32 (no remote access).
 
+However, you can get output sent to a UDP port on a specific machine
+and this can all be done remotely as the *config-set* command will
+work over a WebSocket connection.
+
+```sh
+mos config-set debug.udp_log_addr=10.8.68.95:9993 debug.level=2
+nc --listen --udp 9993
+```
+
+When you are done, you can turn off the UDP logging via:
+
+```sh
+mos config-set debug.udp_log_addr= debug.level=1
+```
+
+NOTE: Changing the UDP logging configuration appears to reset the
+device.
+
 ## Build and Deploy
 
 Cloud Build (requires Internet)
@@ -94,6 +112,15 @@ mos ls -l
 mos get index.html > /tmp/index.html
 mos put /tmp/index.html trash.html
 mos rm trash.html
+```
+
+## Configuration
+
+```sh
+mos config-get
+mos config-get debug.udp_log_addr
+mos config-set debug.udp_log_addr=10.8.68.95:9993 debug.level=2
+mos config-set debug.udp_log_addr=  debug.level=1
 ```
 
 ## RPC
