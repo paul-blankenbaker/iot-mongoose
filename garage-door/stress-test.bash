@@ -34,32 +34,58 @@ fi
 
 declare urlMain="http://${ip}/";
 declare urlOpen="${urlMain}Rpc/Press.Button";
+declare urlStatus="${urlMain}Rpc/Get.Status";
 
 declare -i mainOk=0;
+declare -i statusOk=0;
 declare -i openOk=0;
 declare -i openReq=0;
 declare -i lastRep=$(date +"%s");
+declare -i freeRamMin=-1;
 declare curlOpts="--silent --connect-timeout 2.0";
+declare -i upTime="";
 
 echo "Starting request loop of: ${urlMain}";
+
+getJson() {
+  declare url="${1}";
+  declare json="$(curl ${curlOpts} "${urlOpen}" 2> /dev/null)";
+  if ((PIPESTATUS[0] != 0)); then
+    echo "[ERROR] got: ${json}";
+    return 1;
+  fi
+    
+  declare -i freeRam="$(echo "${json}" | jq .freeRam)";
+  if ((freeRam > 0)) && ( ((freeRamMin == -1)) || ((freeRam < freeRamMin)) ); then
+    freeRamMin=${freeRam};
+  elif ((freeRam == 0)); then
+    echo "[ERROR] bad JSON: ${json}";
+  fi
+  upTime="$(echo "${json}" | jq '.upTime | floor')";
+  return 0;
+}
 
 for ((i=0; i < 100000; i++)); do
   # Request main page
   curl ${curlOpts} "${urlMain}" > /dev/null && mainOk=$((mainOk + 1));
-
+  getJson && statusOk=$((statusOk + 1));
+  
   # If enabled and cycle count is appropriate, trigger action
   if ((openFreq > 0)) && (((i % openFreq) == 0)); then
     openReq=$((openReq + 1));
-    curl ${curlOpts} "${urlOpen}" > /dev/null && openOk=$((openOk + 1));
+    getJson "${urlOpen}" && openOk=$((openOk + 1));
   fi
 
   # Periodically dump a report of how we are doing
   declare -i now=$(date +"%s");
   if (((now - lastRep) >= 10)); then
     lastRep=${now};
-    printf "%s  Main ok:%5d  fail:%5d  Open ok:%5d  fail:%5d\n" \
-           "$(date -Iseconds)" $((mainOk)) $((i + 1 - mainOk)) \
-           $((openOk)) $((openReq - openOk));
+    printf "%s  Main:%5d fail:%5d  Status:%5d fail:%5d  Open:%5d fail:%5d  free:%6d  up:%6d\n" \
+           "$(date -Iseconds)" \
+           $((mainOk)) $((i + 1 - mainOk)) \
+           $((statusOk)) $((i + 1 - mainOk)) \
+           $((openOk)) $((openReq - openOk)) \
+           $((freeRamMin)) "${upTime}";
   fi
   sleep ${sleepSecs};
 done
