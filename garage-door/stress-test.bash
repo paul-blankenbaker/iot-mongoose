@@ -49,7 +49,7 @@ echo "Starting request loop of: ${urlMain}";
 
 getJson() {
   declare url="${1}";
-  declare json="$(curl ${curlOpts} "${urlOpen}" 2> /dev/null)";
+  declare json="$(curl ${curlOpts} "${url}" 2> /dev/null)";
   if ((PIPESTATUS[0] != 0)); then
     echo "[ERROR] got: ${json}";
     return 1;
@@ -69,7 +69,7 @@ getJson() {
 for ((i=0; i < 100000; i++)); do
   # Request main page
   curl ${curlOpts} "${urlMain}" > /dev/null && mainOk=$((mainOk + 1));
-  getJson && statusOk=$((statusOk + 1));
+  ((openFreq >= 0)) && getJson "${urlStatus}" && statusOk=$((statusOk + 1));
   
   # If enabled and cycle count is appropriate, trigger action
   if ((openFreq > 0)) && (((i % openFreq) == 0)); then
@@ -81,12 +81,18 @@ for ((i=0; i < 100000; i++)); do
   declare -i now=$(date +"%s");
   if (((now - lastRep) >= 10)); then
     lastRep=${now};
-    printf "%s  Main:%5d fail:%5d  Status:%5d fail:%5d  Open:%5d fail:%5d  free:%6d  up:%6d\n" \
-           "$(date -Iseconds)" \
-           $((mainOk)) $((i + 1 - mainOk)) \
-           $((statusOk)) $((i + 1 - statusOk)) \
-           $((openOk)) $((openReq - openOk)) \
-           $((freeRamMin)) "${upTime}";
+    if ((openFreq >= 0)); then
+      printf "%s  Main:%5d fail:%5d  Status:%5d fail:%5d  Open:%5d fail:%5d  free:%6d  up:%6d\n" \
+             "$(date -Iseconds)" \
+             $((mainOk)) $((i + 1 - mainOk)) \
+             $((statusOk)) $((i + 1 - statusOk)) \
+             $((openOk)) $((openReq - openOk)) \
+             $((freeRamMin)) "${upTime}";
+    else
+      printf "%s  Main:%5d fail:%5d\n" \
+             "$(date -Iseconds)" \
+             $((mainOk)) $((i + 1 - mainOk));
+    fi
   fi
   sleep ${sleepSecs};
 done
