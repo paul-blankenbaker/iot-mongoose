@@ -1,0 +1,31 @@
+{
+  "app": {
+    "relayPin": 13,
+    "relayUpState": false,
+    "relayDownMsecs": 200,
+    "dhtPin": -1,
+    "msecsBetweenReadings": 2000
+  },
+  "mqtt": {
+    "enable": false,
+    "server": "MQTTSERVER",
+    "topic": "environment/garage",
+    "msecsBetweenPosts": 10000
+  },
+  "device": {
+    "id": "IOTNAME"
+  },
+  "wifi": {
+    "ap": {
+      "enable": true,
+      "ssid": "IOTNAME",
+      "pass": "IOTPASSWORD"
+    },
+    "sta": {
+      "enable": true,
+      "ssid": "WIFIAPNAME",
+      "pass": "WIFIAPPASS",
+      "dhcp_hostname": "IOTNAME"
+    }
+  }
+}

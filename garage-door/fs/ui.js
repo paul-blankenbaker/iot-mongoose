@@ -21,9 +21,20 @@ function statusUpdate() {
   // NOTE: this is from the original XHR request
   let status = JSON.parse(this.responseText);
   updateValue("presses", status["presses"]);
-  updateValue("freeRam", status["freeRam"]);
+  //updateValue("freeRam", status["freeRam"]);
   let hours = parseFloat(status["upTime"]) / 3600.0;
   updateValue("upHours", hours.toFixed(2));
+
+  var sensorOut = document.getElementById("sensor");
+  if (status["hasSensor"]) {
+    let tempF = parseFloat(status["tempC"]) * 9.0 / 5.0 + 32;
+    let humidity = parseFloat(status["humidity"]);
+    updateValue("tempF", tempF.toFixed(1));
+    updateValue("humidity", humidity.toFixed(1));
+    sensorOut.style.display = "inline";
+  } else {
+    sensorOut.style.display = "none";
+  }
 
   var pressed = status["pressed"];
   if (pressed !== undefined) {

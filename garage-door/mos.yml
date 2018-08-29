@@ -1,6 +1,7 @@
 author: Paul Blankenbaker
 description: Experiment with Mongoose OS to create a Web based garage door opener
 version: 1.0
+platform: esp32
 
 libs_version: ${mos.version}
 modules_version: ${mos.version}
@@ -31,21 +32,17 @@ config_schema:
   - ["app.relayPin", "i", 13, {title: "GPIO pin attached to relay"}]
   - ["app.relayUpState", "b", false, {title: "State for pin to keep the relay open (unpressed)"}]
   - ["app.relayDownMsecs", "i", 200, {title: "How many milliseconds to close the relay for to simulate a garage door press"}]
+  - ["app.dhtPin", "i", -1, {title: "GPIO pin attached to DHT-22 sensor or -1 if no sensor connected"}]
+  - ["app.msecsBetweenReadings", "i", 2000, {title: "Number of milliseconds between each DHT-22 temperature/humidity reading"}]
+  - ["app.temperatureTolerance", "d", 0.25, {title: "Maximum change between subsequent temperature readings"}]
+  - ["app.humidityTolerance", "d", 0.5, {title: "Maximum change between subsequent humidity readings"}]
+  - ["mqtt.enable", "b", false, { title: "Set to true if you want to post JSON status to MQTT server"}]
+  - ["mqtt.server", "s", "127.0.0.1", { title: "IP address or host name of MQTT server to post MQTT JSON status message to"}]
+  - ["mqtt.topic", "s", "environment/garage", { title: "The topic to post status information under" }]
+  - ["mqtt.msecsBetweenPosts", "i", 60000, { title: "Milliseconds between posts of JSON status to MQTT server" }]
 
-# Libraries used for this app enable the following:
-# - WIFI to enable networking
-# - An HTTP web server so user can trigger relay using a web browser
-# - RPC services to simplify web interface and enable local management
-# - mjs To enable JavaScript on the embedded device.
 libs:
-  - origin: https://github.com/mongoose-os-libs/ca-bundle
-  - origin: https://github.com/mongoose-os-libs/ota-http-server
-  - origin: https://github.com/mongoose-os-libs/http-server
-  - origin: https://github.com/mongoose-os-libs/rpc-service-config
-  - origin: https://github.com/mongoose-os-libs/rpc-service-fs
-  - origin: https://github.com/mongoose-os-libs/rpc-uart
-  - origin: https://github.com/mongoose-os-libs/wifi
-  - origin: https://github.com/mongoose-os-libs/mjs
+  - origin: https://github.com/mongoose-os-libs/js-demo-bundle
 
 # Used by the mos tool to catch mos binaries incompatible with this file format
 manifest_version: 2017-09-29

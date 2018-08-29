@@ -6,10 +6,10 @@ This is a relatively simple application that allows a user to remotely
 control a garage door by "pressing" the garage door button using a
 relay connected to an ESP32 device.
 
-**Security Warning** The default settings for this project (and
-probably most Mongoose projects) are not secure!  Anyone that gains
-access to your WIFI network will be able to trigger the relay once
-they find the device. Refer to the Mongoose Security page
+**Security Warning** The default settings for this project are secured
+only by WIFI passwords.  Anyone that gains access to your WIFI network
+will be able to trigger the relay once they find the device! Refer to
+the Mongoose Security page
 (https://mongoose-os.com/docs/userguide/security.md) for details on
 enabling encryption, changing the HTTP port and requiring
 authentication.
@@ -25,14 +25,14 @@ authentication.
   time.
 
 - Build and flash the project to your ESP32 device. If you do not have
-  docker, drop the *--local* option for a cloud build. If you have a
-  different device change the architecture argument (like: *--arch
-  esp8266*), however be aware that this code has not been tested on
-  other devices.
+  docker running, drop the *--local* option for a cloud build. If you
+  have a different device change the architecture argument (like:
+  *--platform esp8266*), however be aware that this code has not been
+  tested on other devices.
 
 ```sh
 export MOS_PORT=/dev/ttyUSB0
-mos build --arch esp32 --local && mos flash
+mos build --platform esp32 --local && mos flash
 ```
 
 - Open up the application in a browser (it should render the
@@ -51,7 +51,7 @@ in a location that makes connecting a USB cable difficult.
 
 ```sh
 export MOS_IP=192.168.4.1
-mos build --arch esp32 --local
+mos build --platform esp32 --local
 curl -v -i -F filedata=@build/fw.zip http://${MOS_IP}/update
 ```
 
@@ -76,23 +76,68 @@ mos build --arch esp8266 --local
 
 ## Application Configuration
 
-Application specific settings are found in the "app" section of
-the JSON configuration file *conf1.template.json*. The defaults are:
+Application specific settings are found in the "app" and "mqtt"
+sections of the JSON configuration file *conf1.template.json*. Many
+other standard settings are found under the "device" and "wifi" areas.
+
+### Settings under "app"
+
+The "app" section of the JSON configuration area in the
+*fs/conf1.json* file will look similar to:
 
 ```json
 {
  "app": {
   "relayPin": 13,
   "relayUpState": false,
-  "relayDownMsecs": 200
- }
+  "relayDownMsecs": 200,
+  "dhtPin": -1,
+  "msecsBetweenReadings": 2000
+ },
+ ... Rest of JSON configuration ...
 }
 ```
 
-Unfortunately, comments can not be placed in the configuration file. Here is the definition of each setting that you can adjust:
+Unfortunately, comments can not be placed in the configuration
+file. Here is the definition of each setting that you can adjust:
 
-| Key            |                                                            |
+| Key            | Description                                                |
 | -------------- | -----------------------------------------------------------|
 | relayPin       | The GPIO pin on your board that is connected to the relay. NOTE: The default is 13 which may not be what you want in your final product. Often 13 is tied to an on-board status LED, which is nice for initial testing, but you may or may not want the blinking LED on your final install. The choice of the pin can be critical. You want to make sure that you select a GPIO pin that is not used for multiple purposes or does not start in a well known state at boot time (sometimes GPIO pins can be used for serial port lines at initial boot and then repurposed once the software is loaded - you must avoid those pins). Pins 13, 27, 33, 15, 32 and 14 on the [Adafruit HUZZAH32](https://learn.adafruit.com/adafruit-huzzah32-esp32-feather/pinouts) are all probably usable. |
 | relayUpState   | State to set the GPIO pin to so the relay remains open (keeps garage button in unpressed up state). |
 | relayDownMsecs | How many milliseconds to close the relay in an attempt to emulate someone pressing the garage door button. |
+| dhtPin         | If you have a DHT22 temperature and humidity sensor connected, this should be the ID of the GPIO pin it is connected to (16 works on a ESP32). This is optional. If you do not have a DHT22 sensor, set this option to -1. |
+| msecsBetweenReadings | How many milliseconds between readings of the temperature and humidity. The DHT22 sensor does not like to be read too quickly, 2000 seems to be a fairly safe number. |
+
+### Settings under "mqtt"
+
+This progam has the ability to periodically post a JSON status message to an mqtt server (this feature is disabled by default).
+
+While there are many MQTT settings available (use: ```mos config-get mqtt`` to see all of the possible settings), there are only a few you are likely to need to set in the "mqtt "app" section of the JSON configuration area in the
+*fs/conf1.json* file.
+
+```json
+{
+  ... Application settings ...
+
+  "mqtt": {
+    "enable": false,
+    "server": "MQTTSERVER",
+    "topic": "environment/garage",
+    "msecsBetweenPosts": 10000
+  },
+
+  ... Rest of JSON Configuration ...
+}
+```
+
+Unfortunately, comments can not be placed in the configuration
+file. Here is the definition of each setting that you can adjust:
+
+
+| Key            | Description                                                |
+| -------------- | -----------------------------------------------------------|
+| enable         | You must set this option to *true* if you want to enable the posting of the JSON status string to your MQTT server. |
+| server         | This needs to be set to the IP address or host name of your MQTT server. |
+| topic          | This needs to be set to the location to store the JSON status message under at the MQTT server (what people will subscribe to when they want updates). |
+| msecsBetweenPosts | This controls how often status information is posted. The value is specified as the number of milliseconds between updates. |
