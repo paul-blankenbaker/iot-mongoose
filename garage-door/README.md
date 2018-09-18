@@ -141,3 +141,14 @@ file. Here is the definition of each setting that you can adjust:
 | server         | This needs to be set to the IP address or host name of your MQTT server. |
 | topic          | This needs to be set to the location to store the JSON status message under at the MQTT server (what people will subscribe to when they want updates). |
 | msecsBetweenPosts | This controls how often status information is posted. The value is specified as the number of milliseconds between updates. |
+
+
+#  Sample Scripts
+
+The *scripts* directory contains examples of grabbing and processing data from the IOT device (ESP32) once it is deployed.
+
+| Script  | Description |
+| ------- | ----------- |
+| json-log.bash | Uses the **curl** command to periodically grab the JSON status information, inserts some addition fields using **jq** and appends the entire JSON record as a single line to a log file. |
+| log-to-csv.js | Reads a JSON log file created by **json-log.bash** and produces a simple CSV file containing time, temperature and humidity information. |
+| log-to-svg.bash | Uses **gnuplot** in combination with the output of **log-to-csv.js** to generate a SVG image plotting temperature and humidity. |
