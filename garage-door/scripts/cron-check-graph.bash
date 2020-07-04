@@ -42,7 +42,7 @@ declare -i secsBetween=60;
 declare confFile="${HOME}/.local/etc/cron-check-graph.conf";
 
 if [ -f "${confFile}" ] ;then
-  sourc "${confFile}";
+  source "${confFile}";
 fi
 
 declare cmdDir="$(dirname "${0}")";
