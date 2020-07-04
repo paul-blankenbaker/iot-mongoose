@@ -25,20 +25,21 @@ Examples:
   exit 1;
 fi
 
+declare scriptDir="$(dirname "${0}")";
+
 # require CMD [VAR_NAME [PKG]]
 #
 #   Lookws for CMD in PATH and standard bin directories, if found sets
 #   VAR_NAME to full path of command (VAR_NAME defaults to __${CMD} if
 #   omitted). If not found recommends PKG to try installing (PKG
 #   defaults to ${CMD} if omitted).
-declare execDir=".";
 
 require() {
   declare cmd="${1}";
   declare var="${2:-__${cmd}}";
   declare pkg="${3:-${cmd}}";
 
-  for d in ${execDir} ${PATH//:/ } /bin /usr/bin /sbin /usr/sbin; do
+  for d in ${scriptDir} ${execDir} ${PATH//:/ } /bin /usr/bin /sbin /usr/sbin; do
     if [ -x "${d}/${cmd}" ]; then
       eval "${var}=${d}/${cmd}";
       return 0;
@@ -59,7 +60,6 @@ require dirname __dirname coreutils;
 require date __date coreutils;
 require rm __rm coreutils;
 require gnuplot;
-declare execDir="$(${__dirname} ${0})";
 require log-to-csv.js __log_to_csv;
 
 # Required by supporting scripts - check them now
@@ -67,19 +67,19 @@ require jq;
 require node __node nodejs;
 require install __install coreutils;
 
-declare name="${2:-$(${__basename} "${jsonLog}" .json)}";
-declare tempMin="${4:-55}";
-declare tempMax="${5:-85}";
-declare dateStamp="${6:-${dateStampDef}}";
-
 declare -i timetNow=$(${__date} +%s);
 declare -i timetYesterday=$(( timetNow - (24 * 60 * 60) ));
 declare dateStampDef="$(${__date} --date=@${timetYesterday} +"%Y-%m-%d")";
 
+declare name="${2:-$(${__basename} "${jsonLog}" .json)}";
+declare tempMin="${3:-55}";
+declare tempMax="${4:-85}";
+declare dateStamp="${5:-${dateStampDef}}";
+
 declare dataTitle="Temperature/Humidity (${name})";
 
 # Output directory and files to store here on web server
-declare outDir="${HOME}/public_html/temperature";
+declare outDir="${6:-${HOME}/public_html/temperature}";
 declare nameDir="${outDir}/${name}";
 declare csvFile="${nameDir}/${name}-${dateStamp}.csv";
 declare csvCur="${outDir}/${name}.csv";
