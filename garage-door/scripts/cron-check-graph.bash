@@ -92,6 +92,11 @@ get_sensor_pid() {
   ${__pgrep} -f "${__json-log.bash} ${name}";
 }
 
+run() {
+  echo -e "DEBUG: Running:\n  ${@}\n";
+  "${@}";
+}
+
 check_sensor() {
   declare name="${1}";
   declare ip="${2}";
@@ -116,9 +121,13 @@ check_sensor() {
     declare logFile="${logDir}/${name}-${date}.log";
     if [ -f "${logFile}" ]; then
       declare nameDir="${svgDir}/${name}";
-      ${__log_to_svg} "${logFile}" ${name} ${tempMin} ${tempMax} ${date} "${nameDir}";
-      ${__ln} "${nameDir}/${name}.svg" "${nameDir}/${name}-${date}.svg";
-      ${__ln} "${nameDir}/${name}.csv" "${nameDir}/${name}-${date}.csv";
+      declare bname="${nameDir}/${name}";
+      run ${__log_to_svg} "${logFile}" ${name} ${tempMin} ${tempMax} ${date} "${nameDir}";
+
+      for ext in svg csv; do
+        ${__rm} -f "${bname}-${date}.${ext}";
+        ${__ln} "${bname}.${ext}" "${bname}-${date}.${ext}";
+      done
     fi
   done
 }

@@ -119,7 +119,7 @@ set xdata time;
 #set yrange [${tempMin}:${tempMax}];
 set timefmt "%Y-%m-%dT%H:%M:%S";
 #set timefmt "%s";
-set format x "%I:%M%p";
+set format x "%d %I:%M%p";
 #set format x "%I:%M";
 set title "${dataTitle}";
 set xlabel "Time";
