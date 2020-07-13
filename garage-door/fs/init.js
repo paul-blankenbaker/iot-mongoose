@@ -39,6 +39,7 @@ let lastHumidity = 0;
 let curTemp = 0;
 let curHumidity = 0;
 let curAvailable = false;
+let badReadings = 0;
 
 // If dhtPin pin is set, then enable periodic reading of temp/humidty
 if (dhtPin !== -1) {
@@ -56,9 +57,13 @@ if (dhtPin !== -1) {
 
       if (isNaN(h) || isNaN(t)) {
 	print('Failed to read data from sensor');
-	lastTemp = lastHumidity = -1;
+	badReadings++;
+	if (badReadings > 10) {
+	  lastTemp = lastHumidity = -1;
+	}
 	return;
       }
+      badReadings = 0;
 
       if ((Math.abs(t - lastTemp) <= tmpTolerance) && (Math.abs(h - lastHumidity) <= humTolerance)) {
 	// At this point we have confirmed readings, show them
